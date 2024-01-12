@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "mzanni.app.applab5gmobilenetmonitor_v2"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "mzanni.app.applab5gmobilenetmonitor_v2"
