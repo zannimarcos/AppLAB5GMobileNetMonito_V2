@@ -66,6 +66,9 @@ public class MainActivity<Network> extends AppCompatActivity {
         btnParar= findViewById(R.id.btnParar);
         textInput1 = findViewById(R.id.textInput1);
 
+        final double[] latitude = new double[1];
+        final double[] longitude = new double[1];
+
         //allow all threading policies
         if(Build.VERSION.SDK_INT >9){
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -80,9 +83,8 @@ public class MainActivity<Network> extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSION_REQUEST_CODE);
         } else {
-            Log.i("LAB5GMonitor", "Foi p else!!");
+            Log.i("LAB5G@Monitor", "Foi p else!!");
         }
-
 
 
 
@@ -97,7 +99,7 @@ public class MainActivity<Network> extends AppCompatActivity {
         btnParar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("LAB5GMonitor", "Pressionado PARAR");
+                Log.i("LAB5G@Monitor", "Pressionado PARAR");
 
             }
         });
@@ -107,10 +109,10 @@ public class MainActivity<Network> extends AppCompatActivity {
             public void onClick(View v) {
 
                 //Coletar Data e hora
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss a");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                 String currentDateAndTime = dateFormat.format(new Date());
 
-                Log.i("LAB5GMonitor", currentDateAndTime);
+                Log.i("LAB5G@Monitor", currentDateAndTime);
 
 
 
@@ -124,51 +126,41 @@ public class MainActivity<Network> extends AppCompatActivity {
 
                 NetworkInfo info = connectivityManager.getActiveNetworkInfo();
 
-                Log.i("LAB5GMonitor", "StatusRede :" + info);
+                Log.i("LAB5G@Monitor", "StatusRede :" + info);
 
 
                 //Coletar coodenada geografica
                 locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
                 locationListener = new LocationListener() {
-
-
-
-
-
-                    //@Override
+                    @Override
                     public void onLocationChanged(Location location) {
 
-
-
                         // Handle the new location
-                        double latitude = location.getLatitude();
-                        double longitude = location.getLongitude();
+                        latitude[0] = location.getLatitude();
+                        longitude[0] = location.getLongitude();
 
-                        Log.i("LAB5GMonitor", "LocationChanged");
+                        Log.i("LAB5G@Monitor", "LocationChanged");
+                        Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
+                        Toast.makeText(MainActivity.this, "Latitude: " + latitude[0] + "\nLongitude: " + longitude[0], Toast.LENGTH_LONG).show();
 
-
-
-                        Log.i("LAB5GMonitor", "Coordenadas Geográficas :" + latitude + " " + longitude);
-                        Toast.makeText(MainActivity.this, "Latitude: " + latitude + "\nLongitude: " + longitude, Toast.LENGTH_LONG).show();
                     }
                     @Override
                     public void onStatusChanged(String provider, int status, Bundle extras) {
                         // Handle location provider status changes
 
-                        Log.i("LAB5GMonitor", "StatusChanged");
+                        Log.i("LAB5G@Monitor", "StatusChanged");
                     }
 
                     @Override
                     public void onProviderEnabled(String provider) {
                         // Handle when the location provider is enabled
-                        Log.i("LAB5GMonitor", "ProviderEnabled");
+                        Log.i("LAB5G@Monitor", "ProviderEnabled");
                     }
 
                     @Override
                     public void onProviderDisabled(String provider) {
                         // Handle when the location provider is disabled
-                        Log.i("LAB5GMonitor", "ProviderDisabled");
+                        Log.i("LAB5G@Monitor", "ProviderDisabled");
                     }
                 };
 
@@ -182,16 +174,16 @@ public class MainActivity<Network> extends AppCompatActivity {
 
                 try {
                     InetAddress inetAddress = InetAddress.getByName(ipAddress);
-                    Log.i("LAB5GMonitor", "Pingando: " + ipAddress);
+                    Log.i("LAB5G@Monitor", "Pingando: " + ipAddress);
 
                     System.out.println("Sending Ping Request to " + ipAddress);
                     if (inetAddress.isReachable(2000)) {
                         System.out.println(ipAddress + " is reachable");
-                        Log.i("LAB5GMonitor", "Ping abaixo de 2000ms");
+                        Log.i("LAB5G@Monitor", "Ping abaixo de 2000ms");
                         pingResult = "PING OK";
                     } else {
                         System.out.println(ipAddress + " is not reachable");
-                        Log.i("LAB5GMonitor", "Falhou o ping!!!");
+                        Log.i("LAB5G@Monitor", "Falhou o ping!!!");
                         pingResult = "INALCANCAVEL";
                     }
                 } catch (IOException ex) {
@@ -200,7 +192,9 @@ public class MainActivity<Network> extends AppCompatActivity {
                 }
 
                 //Montando retorno
-                Log.i("LAB5G_DADOS", "Destino: "+ ipAddress + ";" + currentDateAndTime + ";" +  pingResult + ";" + info);
+
+
+                Log.i("LAB5G@DADOS", "Destino: "+ ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0] +";" +  pingResult + ";" + info);
             }
 
 
