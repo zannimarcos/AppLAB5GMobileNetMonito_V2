@@ -86,6 +86,31 @@ public class MainActivity<Network> extends AppCompatActivity {
             Log.i("LAB5G@Monitor", "Foi p else!!");
         }
 
+        //Inicializa GPS
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+                // Handle the new location
+                latitude[0] = location.getLatitude();
+                longitude[0] = location.getLongitude();
+
+                Log.i("LAB5G@Monitor", "LocationChanged");
+                Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
+                Toast.makeText(MainActivity.this, "Latitude: " + latitude[0] + "\nLongitude: " + longitude[0], Toast.LENGTH_LONG).show();
+
+            }
+
+
+        };
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000,1, locationListener);
+
+        //Leitura dos botões
+
 
 
         btnFinalizar.setOnClickListener(new View.OnClickListener() {
