@@ -21,6 +21,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -47,13 +48,10 @@ public class MainActivity<Network> extends AppCompatActivity {
     TextInputEditText textInput1;
 
 
-
-
     private static final int PERMISSION_REQUEST_CODE = 1;
     private LocationManager locationManager;
     private LocationListener locationListener;
-
-
+    private TelephonyManager telephonyManager;
 
 
     @Override
@@ -63,18 +61,17 @@ public class MainActivity<Network> extends AppCompatActivity {
 
         btnFinalizar = findViewById(R.id.btnFinalizar);
         btnIniciar = findViewById(R.id.btnIniciar);
-        btnParar= findViewById(R.id.btnParar);
+        btnParar = findViewById(R.id.btnParar);
         textInput1 = findViewById(R.id.textInput1);
 
         final double[] latitude = new double[1];
         final double[] longitude = new double[1];
 
         //allow all threading policies
-        if(Build.VERSION.SDK_INT >9){
+        if (Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
-
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -107,10 +104,9 @@ public class MainActivity<Network> extends AppCompatActivity {
 
         };
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000,1, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);
 
         //Leitura dos botões
-
 
 
         btnFinalizar.setOnClickListener(new View.OnClickListener() {
@@ -129,6 +125,8 @@ public class MainActivity<Network> extends AppCompatActivity {
             }
         });
 
+        final int[] cincoG = new int[1];
+
         btnIniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,8 +138,51 @@ public class MainActivity<Network> extends AppCompatActivity {
                 Log.i("LAB5G@Monitor", currentDateAndTime);
 
 
-
                 //Coletar status da rede do celular
+
+                //Coletar status 5G
+
+                TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+
+                Log.d("LAB5G@Monitor", "TelephonyManager telephonyManager");
+
+
+                if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+                    Log.d("LAB5G@Monitor", "if (telephonyManager.getPhoneType()");
+                    // Verificar o tipo de tecnologia disponível (2G/3G/4G/5G)
+                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                        Log.d("LAB5G@Monitor", "!= PackageManager.PERMISSION_GRANTED");
+                         // TODO: Consider calling
+                        //ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+
+                    int networkType = telephonyManager.getNetworkType();
+                    cincoG[0] = networkType;
+                    switch (networkType) {
+                        case TelephonyManager.NETWORK_TYPE_NR:  // 5G
+                            // A conexão é 5G
+                            Log.d("LAB5G@Monitor", "Conexão 5G");
+                            break;
+                        default:
+                            // Outro tipo de conexão
+                            Log.d("LAB5G@Monitor", "Não é uma conexão 5G");
+                            break;
+                    }
+                } else {
+                    Log.d("LAB5G@Monitor", "= PackageManager.PERMISSION_GRANTED");
+                    // Dispositivo não suportado ou não é uma rede GSM
+                    Log.d("LAB5G@Monitor", "Dispositivo não suportado");
+                }
+
+
+
+                //Coletar status rede do celular
                 ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
 
                 Network currentNetwork = (Network) connectivityManager.getActiveNetwork();
@@ -219,7 +260,7 @@ public class MainActivity<Network> extends AppCompatActivity {
                 //Montando retorno
 
 
-                Log.i("LAB5G@DADOS", "Destino: "+ ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0] +";" +  pingResult + ";" + info);
+                Log.i("LAB5G@DADOS", "Destino: "+ ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" +  pingResult + ";" + cincoG[0] + ";" + info);
             }
 
 
