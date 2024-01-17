@@ -55,6 +55,8 @@ public class MainActivity<Network> extends AppCompatActivity {
     private LocationListener locationListener;
     private TelephonyManager telephonyManager;
 
+    private boolean isProcedureRunning = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,164 +125,194 @@ public class MainActivity<Network> extends AppCompatActivity {
         btnParar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("LAB5G@Monitor", "Pressionado PARAR");
-
+                Log.i("LAB5G@Monitor", "Pressionado Parar");
+                stopProcedure();
             }
         });
-
-        final int[] cincoG = new int[1];
-
         btnIniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                editTextMultiLine1.setText("");
-
-                //Coletar Data e hora
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                String currentDateAndTime = dateFormat.format(new Date());
-
-                Log.i("LAB5G@Monitor", currentDateAndTime);
-
-
-                //Coletar status da rede do celular
-
-                //Coletar status 5G
-
-                TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-
-                Log.d("LAB5G@Monitor", "TelephonyManager telephonyManager");
-
-
-                if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
-                    Log.d("LAB5G@Monitor", "if (telephonyManager.getPhoneType()");
-                    // Verificar o tipo de tecnologia disponível (2G/3G/4G/5G)
-                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-
-                         // Liberando acesso a interface do telefone
-
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.READ_PHONE_STATE},
-                                PERMISSION_REQUEST_CODE);
-                        //ActivityCompat.requestPermissions(MainActivity.this, "READ_PHONE_STATE", );
-                        // here to request the missing permissions, and then overriding
-                        //public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults);
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
-                        Log.d("LAB5G@Monitor", "!= PackageManager.PERMISSION_GRANTED");
-                        return;
-                    }
-
-                    int networkType = telephonyManager.getNetworkType();
-                    //cincoG[0] = networkType;
-                    switch (networkType) {
-                        case TelephonyManager.NETWORK_TYPE_NR:  // 5G
-                            // A conexão é 5G
-                            Log.d("LAB5G@Monitor", "Conexão 5G");
-                            cincoG[0] = 5;
-                            break;
-                        default:
-                            // Outro tipo de conexão
-                            Log.d("LAB5G@Monitor", "Não é uma conexão 5G");
-                            cincoG[0] = 0;
-                            break;
-                    }
-                } else {
-                    Log.d("LAB5G@Monitor", "= PackageManager.PERMISSION_GRANTED");
-                    // Dispositivo não suportado ou não é uma rede GSM
-                    Log.d("LAB5G@Monitor", "Dispositivo não suportado");
-                }
-
-
-
-                //Coletar status rede do celular
-                ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
-
-                Network currentNetwork = (Network) connectivityManager.getActiveNetwork();
-
-                NetworkCapabilities caps = connectivityManager.getNetworkCapabilities((android.net.Network) currentNetwork);
-                LinkProperties linkProperties = connectivityManager.getLinkProperties((android.net.Network) currentNetwork);
-
-                NetworkInfo info = connectivityManager.getActiveNetworkInfo();
-
-                Log.i("LAB5G@Monitor", "StatusRede :" + info);
-
-
-                //Coletar coodenada geografica
-                locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                locationListener = new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-
-                        // Handle the new location
-                        latitude[0] = location.getLatitude();
-                        longitude[0] = location.getLongitude();
-
-                        Log.i("LAB5G@Monitor", "LocationChanged");
-                        Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
-                        Toast.makeText(MainActivity.this, "Latitude: " + latitude[0] + "\nLongitude: " + longitude[0], Toast.LENGTH_LONG).show();
-
-                    }
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-                        // Handle location provider status changes
-
-                        Log.i("LAB5G@Monitor", "StatusChanged");
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String provider) {
-                        // Handle when the location provider is enabled
-                        Log.i("LAB5G@Monitor", "ProviderEnabled");
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String provider) {
-                        // Handle when the location provider is disabled
-                        Log.i("LAB5G@Monitor", "ProviderDisabled");
-                    }
-                };
-
-                //Efetuar PING
-
-                String destino = textInput1.getText().toString();
-                String ipAddress = destino;
-
-                String pingResult = "TESTANDO";
-
-
-                try {
-                    InetAddress inetAddress = InetAddress.getByName(ipAddress);
-                    Log.i("LAB5G@Monitor", "Pingando: " + ipAddress);
-
-                    System.out.println("Sending Ping Request to " + ipAddress);
-                    if (inetAddress.isReachable(2000)) {
-                        System.out.println(ipAddress + " is reachable");
-                        Log.i("LAB5G@Monitor", "Ping abaixo de 2000ms");
-                        pingResult = "PING OK";
-                    } else {
-                        System.out.println(ipAddress + " is not reachable");
-                        Log.i("LAB5G@Monitor", "Falhou o ping!!!");
-                        pingResult = "INALCANCAVEL";
-                    }
-                } catch (IOException ex) {
-                    System.out.println("Ping Failed");
-                    ex.printStackTrace();
-                }
-
-                //Montando retorno
-
-
-                Log.i("LAB5G@DADOS", "Destino: "+ ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" +  pingResult + ";" + cincoG[0] + ";" + info);
-                editTextMultiLine1.setText("Destino: "+ ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" +  pingResult + ";" + cincoG[0] + ";" + info);
+                Log.i("LAB5G@Monitor", "Pressionado Iniciar");
+                startProcedure();
             }
+        });
+    }
 
 
-            });
+        private void startProcedure () {
+
+            final double[] latitude = new double[1];
+            final double[] longitude = new double[1];
+            isProcedureRunning = true;
+            Log.i("LAB5G@Monitor", "Procedimento iniciado.");
+
+            // Simulando um procedimento que é repetido até que o botão de parar seja clicado.
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (isProcedureRunning) {
+                        // Execute o procedimento aqui.
+                        // Por exemplo, exiba uma mensagem a cada segundo.
+
+                        final int[] cincoG = new int[1];
+                        //editTextMultiLine1.setText("");
+
+                        //Coletar Data e hora
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                        String currentDateAndTime = dateFormat.format(new Date());
+
+                        Log.i("LAB5G@Monitor", currentDateAndTime);
 
 
-                };
-            }
+                        //Coletar status da rede do celular
+
+                        //Coletar status 5G
+
+                        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+
+                        Log.d("LAB5G@Monitor", "TelephonyManager telephonyManager");
+
+
+                        if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
+                            Log.d("LAB5G@Monitor", "if (telephonyManager.getPhoneType()");
+                            // Verificar o tipo de tecnologia disponível (2G/3G/4G/5G)
+                            if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+
+                                // Liberando acesso a interface do telefone
+
+                                ActivityCompat.requestPermissions(MainActivity.this,
+                                        new String[]{Manifest.permission.READ_PHONE_STATE},
+                                        PERMISSION_REQUEST_CODE);
+                                Log.d("LAB5G@Monitor", "!= PackageManager.PERMISSION_GRANTED");
+                                return;
+                            }
+
+                            int networkType = telephonyManager.getNetworkType();
+                            //cincoG[0] = networkType;
+                            switch (networkType) {
+                                case TelephonyManager.NETWORK_TYPE_NR:  // 5G
+                                    // A conexão é 5G
+                                    Log.d("LAB5G@Monitor", "Conexão 5G");
+                                    cincoG[0] = 5;
+                                    break;
+                                default:
+                                    // Outro tipo de conexão
+                                    Log.d("LAB5G@Monitor", "Não é uma conexão 5G");
+                                    cincoG[0] = 0;
+                                    break;
+                            }
+                        } else {
+                            Log.d("LAB5G@Monitor", "= PackageManager.PERMISSION_GRANTED");
+                            // Dispositivo não suportado ou não é uma rede GSM
+                            Log.d("LAB5G@Monitor", "Dispositivo não suportado");
+                        }
+
+
+                        //Coletar status rede do celular
+                        ConnectivityManager connectivityManager = getSystemService(ConnectivityManager.class);
+
+                        Network currentNetwork = (Network) connectivityManager.getActiveNetwork();
+
+                        NetworkCapabilities caps = connectivityManager.getNetworkCapabilities((android.net.Network) currentNetwork);
+                        LinkProperties linkProperties = connectivityManager.getLinkProperties((android.net.Network) currentNetwork);
+
+                        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+
+                        Log.i("LAB5G@Monitor", "StatusRede :" + info);
+
+
+                        //Coletar coodenada geografica
+                        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                        locationListener = new LocationListener() {
+                            @Override
+                            public void onLocationChanged(Location location) {
+
+                                // Handle the new location
+                                latitude[0] = location.getLatitude();
+                                longitude[0] = location.getLongitude();
+
+                                Log.i("LAB5G@Monitor", "LocationChanged");
+                                Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
+                                Toast.makeText(MainActivity.this, "Latitude: " + latitude[0] + "\nLongitude: " + longitude[0], Toast.LENGTH_LONG).show();
+
+                            }
+
+                            @Override
+                            public void onStatusChanged(String provider, int status, Bundle extras) {
+                                // Handle location provider status changes
+
+                                Log.i("LAB5G@Monitor", "StatusChanged");
+                            }
+
+                            @Override
+                            public void onProviderEnabled(String provider) {
+                                // Handle when the location provider is enabled
+                                Log.i("LAB5G@Monitor", "ProviderEnabled");
+                            }
+
+                            @Override
+                            public void onProviderDisabled(String provider) {
+                                // Handle when the location provider is disabled
+                                Log.i("LAB5G@Monitor", "ProviderDisabled");
+                            }
+                        };
+
+                        //Efetuar PING
+
+                        String destino = textInput1.getText().toString();
+                        String ipAddress = destino;
+
+                        String pingResult = "TESTANDO";
+
+
+                        try {
+                            InetAddress inetAddress = InetAddress.getByName(ipAddress);
+                            Log.i("LAB5G@Monitor", "Pingando: " + ipAddress);
+
+                            System.out.println("Sending Ping Request to " + ipAddress);
+                            if (inetAddress.isReachable(2000)) {
+                                System.out.println(ipAddress + " is reachable");
+                                Log.i("LAB5G@Monitor", "Ping abaixo de 2000ms");
+                                pingResult = "PING OK";
+                            } else {
+                                System.out.println(ipAddress + " is not reachable");
+                                Log.i("LAB5G@Monitor", "Falhou o ping!!!");
+                                pingResult = "INALCANCAVEL";
+                            }
+                        } catch (IOException ex) {
+                            System.out.println("Ping Failed");
+                            ex.printStackTrace();
+                        }
+
+                        //Montando retorno
+
+
+                        Log.i("LAB5G@DADOS", "Destino: " + ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" + pingResult + ";" + cincoG[0] + ";" + info);
+                        editTextMultiLine1.setText("Destino: " + ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" + pingResult + ";" + cincoG[0] + ";" + info);
+
+                        Log.i("LAB5G@Monitor", "Procedimento em andamento.");
+
+                        try {
+                            Thread.sleep(5000); // Aguarde 5 segundos antes de repetir o procedimento.
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
+        }
+
+
+        private void stopProcedure () {
+            isProcedureRunning = false;
+            Log.i("LAB5G@Monitor", "Parando procedimento");
+        }
+
+}
+
+
+
+
 
 
 
