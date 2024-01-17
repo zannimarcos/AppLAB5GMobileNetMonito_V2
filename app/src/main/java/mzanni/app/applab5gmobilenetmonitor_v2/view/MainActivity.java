@@ -47,6 +47,8 @@ public class MainActivity<Network> extends AppCompatActivity {
     Button btnParar;
     TextInputEditText textInput1;
 
+    EditText editTextMultiLine1;
+
 
     private static final int PERMISSION_REQUEST_CODE = 1;
     private LocationManager locationManager;
@@ -63,6 +65,7 @@ public class MainActivity<Network> extends AppCompatActivity {
         btnIniciar = findViewById(R.id.btnIniciar);
         btnParar = findViewById(R.id.btnParar);
         textInput1 = findViewById(R.id.textInput1);
+        editTextMultiLine1 = findViewById(R.id.editTextMultiLine1);
 
         final double[] latitude = new double[1];
         final double[] longitude = new double[1];
@@ -131,6 +134,8 @@ public class MainActivity<Network> extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                editTextMultiLine1.setText("");
+
                 //Coletar Data e hora
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                 String currentDateAndTime = dateFormat.format(new Date());
@@ -151,27 +156,33 @@ public class MainActivity<Network> extends AppCompatActivity {
                     Log.d("LAB5G@Monitor", "if (telephonyManager.getPhoneType()");
                     // Verificar o tipo de tecnologia disponível (2G/3G/4G/5G)
                     if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                        Log.d("LAB5G@Monitor", "!= PackageManager.PERMISSION_GRANTED");
-                         // TODO: Consider calling
-                        //ActivityCompat#requestPermissions
+
+                         // Liberando acesso a interface do telefone
+
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.READ_PHONE_STATE},
+                                PERMISSION_REQUEST_CODE);
+                        //ActivityCompat.requestPermissions(MainActivity.this, "READ_PHONE_STATE", );
                         // here to request the missing permissions, and then overriding
-                        //public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //int[] grantResults)
+                        //public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults);
                         // to handle the case where the user grants the permission. See the documentation
                         // for ActivityCompat#requestPermissions for more details.
+                        Log.d("LAB5G@Monitor", "!= PackageManager.PERMISSION_GRANTED");
                         return;
                     }
 
                     int networkType = telephonyManager.getNetworkType();
-                    cincoG[0] = networkType;
+                    //cincoG[0] = networkType;
                     switch (networkType) {
                         case TelephonyManager.NETWORK_TYPE_NR:  // 5G
                             // A conexão é 5G
                             Log.d("LAB5G@Monitor", "Conexão 5G");
+                            cincoG[0] = 5;
                             break;
                         default:
                             // Outro tipo de conexão
                             Log.d("LAB5G@Monitor", "Não é uma conexão 5G");
+                            cincoG[0] = 0;
                             break;
                     }
                 } else {
@@ -261,6 +272,7 @@ public class MainActivity<Network> extends AppCompatActivity {
 
 
                 Log.i("LAB5G@DADOS", "Destino: "+ ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" +  pingResult + ";" + cincoG[0] + ";" + info);
+                editTextMultiLine1.setText("Destino: "+ ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" +  pingResult + ";" + cincoG[0] + ";" + info);
             }
 
 
