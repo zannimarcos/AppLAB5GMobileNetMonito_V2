@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
@@ -288,9 +289,12 @@ public class MainActivity<Network> extends AppCompatActivity {
 
 
                         Log.i("LAB5G@DADOS", "Destino: " + ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" + pingResult + ";" + cincoG[0] + ";" + info);
-                        editTextMultiLine1.setText("Destino: " + ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" + pingResult + ";" + cincoG[0] + ";" + info);
+                        String dadoRetorno = "Destino: " + ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" + pingResult + ";" + cincoG[0] + ";" + info;
+                        editTextMultiLine1.setText(dadoRetorno);
 
                         Log.i("LAB5G@Monitor", "Procedimento em andamento.");
+
+                        salvarDadoEmArquivo(getApplicationContext(), dadoRetorno, "Monitoramento_"+ currentDateAndTime +"_LAB5G.txt");
 
                         try {
                             Thread.sleep(5000); // Aguarde 5 segundos antes de repetir o procedimento.
@@ -307,6 +311,19 @@ public class MainActivity<Network> extends AppCompatActivity {
             isProcedureRunning = false;
             Log.i("LAB5G@Monitor", "Parando procedimento");
         }
+
+
+
+        public void salvarDadoEmArquivo(Context context, String dado, String nomeArquivo) {
+            try {
+                FileOutputStream outputStream = context.openFileOutput(nomeArquivo, Context.MODE_PRIVATE);
+                outputStream.write(dado.getBytes());
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
 
 }
 
