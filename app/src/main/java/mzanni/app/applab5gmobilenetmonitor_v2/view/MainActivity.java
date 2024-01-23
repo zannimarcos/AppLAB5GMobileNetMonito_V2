@@ -35,7 +35,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import mzanni.app.applab5gmobilenetmonitor_v2.monitoramento.Controller;
 import mzanni.app.applab5gmobilenetmonitor_v2.R;
@@ -58,6 +61,9 @@ public class MainActivity<Network> extends AppCompatActivity {
 
     private boolean isProcedureRunning = false;
 
+    List<String> registros = new ArrayList<String>();
+    String currentDateAndTime;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +78,7 @@ public class MainActivity<Network> extends AppCompatActivity {
 
         final double[] latitude = new double[1];
         final double[] longitude = new double[1];
+
 
         //allow all threading policies
         if (Build.VERSION.SDK_INT > 9) {
@@ -160,7 +167,7 @@ public class MainActivity<Network> extends AppCompatActivity {
 
                         //Coletar Data e hora
                         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-                        String currentDateAndTime = dateFormat.format(new Date());
+                        currentDateAndTime = dateFormat.format(new Date());
 
                         Log.i("LAB5G@Monitor", currentDateAndTime);
 
@@ -234,7 +241,6 @@ public class MainActivity<Network> extends AppCompatActivity {
 
                                 Log.i("LAB5G@Monitor", "LocationChanged");
                                 Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
-                                Toast.makeText(MainActivity.this, "Latitude: " + latitude[0] + "\nLongitude: " + longitude[0], Toast.LENGTH_LONG).show();
 
                             }
 
@@ -289,12 +295,13 @@ public class MainActivity<Network> extends AppCompatActivity {
 
 
                         Log.i("LAB5G@DADOS", "Destino: " + ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" + pingResult + ";" + cincoG[0] + ";" + info);
-                        String dadoRetorno = "Destino: " + ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" + pingResult + ";" + cincoG[0] + ";" + info;
+                        String dadoRetorno = "Destino: " + ipAddress + "|" + currentDateAndTime + "|" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + "|" + pingResult + "|" + cincoG[0] + "|" + info;
                         editTextMultiLine1.setText(dadoRetorno);
 
                         Log.i("LAB5G@Monitor", "Procedimento em andamento.");
 
-                        salvarDadoEmArquivo(getApplicationContext(), dadoRetorno, "Monitoramento_"+ currentDateAndTime +"_LAB5G.txt");
+                        registros.add(dadoRetorno);
+
 
                         try {
                             Thread.sleep(5000); // Aguarde 5 segundos antes de repetir o procedimento.
@@ -309,6 +316,28 @@ public class MainActivity<Network> extends AppCompatActivity {
 
         private void stopProcedure () {
             isProcedureRunning = false;
+
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+                // Liberando acesso a gravação de arquivos
+
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_CODE);
+                Log.d("LAB5G@Monitor", "!= PackageManager.PERMISSION_GRANTED");
+                return;
+            }
+
+
+            String nomeArquivo = "Monitoramento_"+ currentDateAndTime +"_LAB5G.txt";
+
+            for (int i = 0; i < registros.size(); i++) {
+
+                salvarDadoEmArquivo(getApplicationContext(), registros.get(i) + "\n", nomeArquivo);
+
+            }
+
+
             Log.i("LAB5G@Monitor", "Parando procedimento");
         }
 
@@ -319,6 +348,7 @@ public class MainActivity<Network> extends AppCompatActivity {
                 FileOutputStream outputStream = context.openFileOutput(nomeArquivo, Context.MODE_PRIVATE);
                 outputStream.write(dado.getBytes());
                 outputStream.close();
+                Log.i("LAB5G@Monitor", "Gravando arquivo LOG");
             } catch (IOException e) {
                 e.printStackTrace();
             }
