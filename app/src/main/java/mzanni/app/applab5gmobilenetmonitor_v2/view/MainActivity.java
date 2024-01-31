@@ -6,6 +6,7 @@ import static java.sql.DriverManager.println;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
@@ -20,6 +21,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.StrictMode;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -31,14 +33,17 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import mzanni.app.applab5gmobilenetmonitor_v2.monitoramento.Controller;
 import mzanni.app.applab5gmobilenetmonitor_v2.R;
@@ -55,6 +60,7 @@ public class MainActivity<Network> extends AppCompatActivity {
 
 
     private static final int PERMISSION_REQUEST_CODE = 1;
+    private static final int REQUEST_PERMISSION_WRITE_STORAGE = 1;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private TelephonyManager telephonyManager;
@@ -93,7 +99,18 @@ public class MainActivity<Network> extends AppCompatActivity {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSION_REQUEST_CODE);
         } else {
-            Log.i("LAB5G@Monitor", "Foi p else!!");
+            Log.i("LAB5G@Monitor", "Permissão p localização");
+        }
+
+        // Check if permission to write to external storage is granted
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_PERMISSION_WRITE_STORAGE);
+        } else {
+            Log.i("LAB5G@Monitor", "Permissão p gravação de arquivo");
         }
 
         //Inicializa GPS
@@ -317,43 +334,51 @@ public class MainActivity<Network> extends AppCompatActivity {
         private void stopProcedure () {
             isProcedureRunning = false;
 
-            if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            saveArrayToFile();
 
-                // Liberando acesso a gravação de arquivos
+        }
 
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        PERMISSION_REQUEST_CODE);
-                Log.d("LAB5G@Monitor", "!= PackageManager.PERMISSION_GRANTED");
-                return;
-            }
-
-
-            String nomeArquivo = "Monitoramento_"+ currentDateAndTime +"_LAB5G.txt";
-
-            for (int i = 0; i < registros.size(); i++) {
-
-                salvarDadoEmArquivo(getApplicationContext(), registros.get(i) + "\n", nomeArquivo);
-
-            }
-
-
+    private void saveArrayToFile() {
+        try {
+            // Create a new file in the Downloads directory
+            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             Log.i("LAB5G@Monitor", "Parando procedimento");
+            String stringWithoutSpaces = currentDateAndTime.replaceAll("\\s", "").replace("-", "").replace(":","");
+
+
+            String nomeArquivo = "LAB5GMonitor_" + stringWithoutSpaces;
+            Log.i("LAB5G@Monitor", "Nome do arquivo: " + nomeArquivo);
+            File file = new File(dir, nomeArquivo +".txt");
+
+            // Write the array elements to the file
+            FileOutputStream fos = new FileOutputStream(file);
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+            for (String item : registros) {
+                osw.write(item + "\n");
+            }
+            osw.close();
+            fos.close();
+
+            Log.d("LAB5G@Monitor", "Array data saved to file: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-
-        public void salvarDadoEmArquivo(Context context, String dado, String nomeArquivo) {
-            try {
-                FileOutputStream outputStream = context.openFileOutput(nomeArquivo, Context.MODE_PRIVATE);
-                outputStream.write(dado.getBytes());
-                outputStream.close();
-                Log.i("LAB5G@Monitor", "Gravando arquivo LOG");
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (requestCode == REQUEST_PERMISSION_WRITE_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, save the array to a text file
+                saveArrayToFile();
+            } else {
+                // Permission denied
+                Log.d("LAB5G@Monitor", "Write permission denied, unable to save array to file.");
             }
         }
-
+    }
 
 }
 
