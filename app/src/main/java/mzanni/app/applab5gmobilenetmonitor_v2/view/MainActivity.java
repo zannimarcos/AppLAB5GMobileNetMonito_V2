@@ -311,10 +311,10 @@ public class MainActivity<Network> extends AppCompatActivity {
                         //Montando retorno
 
 
-                        Log.i("LAB5G@DADOS", "Destino: " + ipAddress + ";" + currentDateAndTime + ";" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + ";" + pingResult + ";" + cincoG[0] + ";" + info);
-                        String dadoRetorno = "Destino: " + ipAddress + "|" + currentDateAndTime + "|" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + "|" + pingResult + "|" + cincoG[0] + "|" + info;
-                        editTextMultiLine1.setText(dadoRetorno);
 
+                        String dadoRetorno = "Destino: " + ipAddress + "|" + currentDateAndTime + "|" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + "|" + pingResult + "|" + cincoG[0] + "|" + info.getTypeName() + "_" + info.getSubtypeName();
+                        editTextMultiLine1.setText(dadoRetorno);
+                        Log.i("LAB5G@DADOS", dadoRetorno);
                         Log.i("LAB5G@Monitor", "Procedimento em andamento.");
 
                         registros.add(dadoRetorno);
