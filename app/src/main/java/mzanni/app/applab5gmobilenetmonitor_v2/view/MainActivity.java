@@ -67,8 +67,8 @@ public class MainActivity<Network> extends AppCompatActivity {
         textInput1 = findViewById(R.id.textInput1);
         editTextMultiLine1 = findViewById(R.id.editTextMultiLine1);
 
-        final double[] latitude = new double[1];
-        final double[] longitude = new double[1];
+        final double[] latitude = new double[1000];
+        final double[] longitude = new double[1000];
 
 
         //allow all threading policies
@@ -150,8 +150,8 @@ public class MainActivity<Network> extends AppCompatActivity {
 
         private void startProcedure () {
 
-            final double[] latitude = new double[1];
-            final double[] longitude = new double[1];
+            final double[] latitude = new double[1000];
+            final double[] longitude = new double[1000];
             isProcedureRunning = true;
             Log.i("LAB5G@Monitor", "Procedimento iniciado.");
 
@@ -163,7 +163,7 @@ public class MainActivity<Network> extends AppCompatActivity {
                         // Execute o procedimento aqui.
                         // Por exemplo, exiba uma mensagem a cada segundo.
 
-                        final int[] cincoG = new int[1];
+                        final int[] cincoG = new int[1000];
                         //editTextMultiLine1.setText("");
 
                         //Coletar Data e hora
@@ -291,7 +291,7 @@ public class MainActivity<Network> extends AppCompatActivity {
 
 
 
-                        String dadoRetorno = "Destino: " + ipAddress + "|" + currentDateAndTime + "|" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + "|" + pingResult + "|" + cincoG[0] + "|" + info.getTypeName() + "_" + info.getSubtypeName();
+                        String dadoRetorno = "Destino: " + ipAddress + "|" + currentDateAndTime + "|" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + "|" + pingResult + "|" + cincoG[0] + "|" + info;
                         editTextMultiLine1.setText(dadoRetorno);
                         Log.i("LAB5G@DADOS", dadoRetorno);
 
