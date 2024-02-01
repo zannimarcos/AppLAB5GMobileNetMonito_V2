@@ -1,13 +1,7 @@
 package mzanni.app.applab5gmobilenetmonitor_v2.view;
 
-import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
-
-import static java.sql.DriverManager.println;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -16,7 +10,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
-import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -29,10 +22,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,12 +30,7 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import mzanni.app.applab5gmobilenetmonitor_v2.monitoramento.Controller;
 import mzanni.app.applab5gmobilenetmonitor_v2.R;
 
 public class MainActivity<Network> extends AppCompatActivity {
@@ -67,7 +52,7 @@ public class MainActivity<Network> extends AppCompatActivity {
 
     private boolean isProcedureRunning = false;
 
-    List<String> registros = new ArrayList<String>();
+    public ArrayList<String> registros = new ArrayList<String>();
     String currentDateAndTime;
 
 
@@ -214,17 +199,13 @@ public class MainActivity<Network> extends AppCompatActivity {
 
                             int networkType = telephonyManager.getNetworkType();
                             //cincoG[0] = networkType;
-                            switch (networkType) {
-                                case TelephonyManager.NETWORK_TYPE_NR:  // 5G
-                                    // A conexão é 5G
-                                    Log.d("LAB5G@Monitor", "Conexão 5G");
-                                    cincoG[0] = 5;
-                                    break;
-                                default:
-                                    // Outro tipo de conexão
-                                    Log.d("LAB5G@Monitor", "Não é uma conexão 5G");
-                                    cincoG[0] = 0;
-                                    break;
+                            if (networkType == TelephonyManager.NETWORK_TYPE_NR) {  // 5G
+                                // A conexão é 5G
+                                Log.d("LAB5G@Monitor", "Conexão 5G");
+                                cincoG[0] = 5;
+                            } else {// Outro tipo de conexão
+                                Log.d("LAB5G@Monitor", "Não é uma conexão 5G");
+                                cincoG[0] = 0;
                             }
                         } else {
                             Log.d("LAB5G@Monitor", "= PackageManager.PERMISSION_GRANTED");
@@ -318,6 +299,10 @@ public class MainActivity<Network> extends AppCompatActivity {
                         Log.i("LAB5G@Monitor", "Procedimento em andamento.");
 
                         registros.add(dadoRetorno);
+                        for(String item:registros){
+                            Log.i("LAB5G@DADOS_registros", item);
+
+                        }
 
 
                         try {
