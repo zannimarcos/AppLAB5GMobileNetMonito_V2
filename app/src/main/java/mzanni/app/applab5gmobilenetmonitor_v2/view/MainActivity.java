@@ -112,7 +112,6 @@ public class MainActivity<Network> extends AppCompatActivity {
 
                 Log.i("LAB5G@Monitor", "LocationChanged");
                 Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
-                Toast.makeText(MainActivity.this, "Latitude: " + latitude[0] + "\nLongitude: " + longitude[0], Toast.LENGTH_LONG).show();
 
             }
 
@@ -168,7 +167,7 @@ public class MainActivity<Network> extends AppCompatActivity {
                         //editTextMultiLine1.setText("");
 
                         //Coletar Data e hora
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                         currentDateAndTime = dateFormat.format(new Date());
 
                         Log.i("LAB5G@Monitor", currentDateAndTime);
@@ -180,11 +179,8 @@ public class MainActivity<Network> extends AppCompatActivity {
 
                         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 
-                        Log.d("LAB5G@Monitor", "TelephonyManager telephonyManager");
-
 
                         if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM) {
-                            Log.d("LAB5G@Monitor", "if (telephonyManager.getPhoneType()");
                             // Verificar o tipo de tecnologia disponível (2G/3G/4G/5G)
                             if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 
@@ -193,7 +189,6 @@ public class MainActivity<Network> extends AppCompatActivity {
                                 ActivityCompat.requestPermissions(MainActivity.this,
                                         new String[]{Manifest.permission.READ_PHONE_STATE},
                                         PERMISSION_REQUEST_CODE);
-                                Log.d("LAB5G@Monitor", "!= PackageManager.PERMISSION_GRANTED");
                                 return;
                             }
 
@@ -208,7 +203,6 @@ public class MainActivity<Network> extends AppCompatActivity {
                                 cincoG[0] = 0;
                             }
                         } else {
-                            Log.d("LAB5G@Monitor", "= PackageManager.PERMISSION_GRANTED");
                             // Dispositivo não suportado ou não é uma rede GSM
                             Log.d("LAB5G@Monitor", "Dispositivo não suportado");
                         }
@@ -229,6 +223,7 @@ public class MainActivity<Network> extends AppCompatActivity {
 
                         //Coletar coodenada geografica
                         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
                         locationListener = new LocationListener() {
                             @Override
                             public void onLocationChanged(Location location) {
@@ -247,18 +242,21 @@ public class MainActivity<Network> extends AppCompatActivity {
                                 // Handle location provider status changes
 
                                 Log.i("LAB5G@Monitor", "StatusChanged");
+                                Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
                             }
 
                             @Override
                             public void onProviderEnabled(String provider) {
                                 // Handle when the location provider is enabled
                                 Log.i("LAB5G@Monitor", "ProviderEnabled");
+                                Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
                             }
 
                             @Override
                             public void onProviderDisabled(String provider) {
                                 // Handle when the location provider is disabled
                                 Log.i("LAB5G@Monitor", "ProviderDisabled");
+                                Log.i("LAB5G@Monitor", "Coordenadas Geográficas :" + latitude[0] + " " + longitude[0]);
                             }
                         };
 
@@ -267,7 +265,7 @@ public class MainActivity<Network> extends AppCompatActivity {
                         String destino = textInput1.getText().toString();
                         String ipAddress = destino;
 
-                        String pingResult = "TESTANDO";
+                        String pingResult = "TESTANDO PING";
 
 
                         try {
@@ -296,7 +294,6 @@ public class MainActivity<Network> extends AppCompatActivity {
                         String dadoRetorno = "Destino: " + ipAddress + "|" + currentDateAndTime + "|" + "Coordenadas Geográficas : @" + latitude[0] + "," + longitude[0] + "|" + pingResult + "|" + cincoG[0] + "|" + info.getTypeName() + "_" + info.getSubtypeName();
                         editTextMultiLine1.setText(dadoRetorno);
                         Log.i("LAB5G@DADOS", dadoRetorno);
-                        Log.i("LAB5G@Monitor", "Procedimento em andamento.");
 
                         registros.add(dadoRetorno);
                         for(String item:registros){
@@ -318,6 +315,7 @@ public class MainActivity<Network> extends AppCompatActivity {
 
         private void stopProcedure () {
             isProcedureRunning = false;
+            Log.i("LAB5G@Monitor", "Parando procedimento");
 
             saveArrayToFile();
 
@@ -327,12 +325,10 @@ public class MainActivity<Network> extends AppCompatActivity {
         try {
             // Create a new file in the Downloads directory
             File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            Log.i("LAB5G@Monitor", "Parando procedimento");
             String stringWithoutSpaces = currentDateAndTime.replaceAll("\\s", "").replace("-", "").replace(":","");
 
 
             String nomeArquivo = "LAB5GMonitor_" + stringWithoutSpaces;
-            Log.i("LAB5G@Monitor", "Nome do arquivo: " + nomeArquivo);
             File file = new File(dir, nomeArquivo +".txt");
 
             // Write the array elements to the file
@@ -344,10 +340,11 @@ public class MainActivity<Network> extends AppCompatActivity {
             osw.close();
             fos.close();
 
-            Log.d("LAB5G@Monitor", "Array data saved to file: " + file.getAbsolutePath());
+            Log.d("LAB5G@Monitor", "Dados salvos no arquivo: " + file.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         }
+        registros.clear();
     }
 
     @Override
